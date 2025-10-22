@@ -137,6 +137,48 @@ tabs.forEach(t=>t.addEventListener("click",()=>{
 
 /* bank list demo */
 document.getElementById("bankList").innerHTML="<li>StateBank_2024-01.pdf</li><li>HDFC_Q1.pdf</li>";
+  // ---- Clarity Tab Tracking ----
+let currentTab = "analysis";
+let tabStartTime = Date.now();
+
+// helper: send custom event to Clarity
+function logTabEvent(tab, action, durationMs) {
+  if (window.clarity) {
+    clarity("event", "tab_interaction", {
+      tab_name: tab,
+      action: action,
+      duration_seconds: Math.round(durationMs / 1000)
+    });
+  }
+}
+
+// modify your existing tab logic:
+tabs.forEach(t => t.addEventListener("click", () => {
+  // calculate time spent on previous tab
+  const now = Date.now();
+  const timeSpent = now - tabStartTime;
+  logTabEvent(currentTab, "leave", timeSpent);
+
+  // switch tab
+  tabs.forEach(b => b.classList.remove("active"));
+  t.classList.add("active");
+  panels.forEach(p => p.classList.remove("active"));
+  document.getElementById(t.dataset.tab).classList.add("active");
+
+  // reset timer
+  currentTab = t.dataset.tab;
+  tabStartTime = Date.now();
+
+  // log tab entry
+  logTabEvent(currentTab, "enter", 0);
+}));
+
+// when user leaves page, send last tab timing
+window.addEventListener("beforeunload", () => {
+  const timeSpent = Date.now() - tabStartTime;
+  logTabEvent(currentTab, "leave", timeSpent);
+});
+
 </script>
 </body>
 </html>
