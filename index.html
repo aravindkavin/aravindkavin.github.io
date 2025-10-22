@@ -1,333 +1,312 @@
-import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { ChevronRight, Search, User2, Calendar, IndianRupee, Percent } from "lucide-react";
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Loan Dashboard — Demo</title>
+  <style>
+    :root{
+      --bg:#f7fafc; --card:#ffffff; --muted:#64748b; --accent:#3b82f6;
+      --success:#16a34a; --danger:#ef4444; --warn:#f59e0b;
+      --radius:12px; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:#0f172a;min-height:100vh}
+    .wrap{max-width:1100px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    h1{margin:0;font-size:20px}
+    p.sub{margin:0;color:var(--muted);font-size:13px}
 
-// --- Types
-export type LoanStatus = "Approved" | "Rejected" | "On Hold";
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+    .search{flex:1;min-width:220px;display:flex;align-items:center;background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #e6edf3}
+    .search input{border:0;outline:0;font-size:14px;width:100%}
+    .filters{display:flex;gap:8px;flex-wrap:wrap}
+    .filter-btn{background:var(--card);border:1px solid #e6edf3;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+    .filter-btn.active{box-shadow:0 0 0 3px rgba(59,130,246,0.08);border-color:var(--accent)}
 
-export type Loan = {
-  id: string;
-  borrower: string;
-  amount: number; // in INR
-  apr: number; // as percent
-  status: LoanStatus;
-  updatedAt: string; // ISO date
-  product?: string;
-  purpose?: string;
-  termMonths?: number;
-  notes?: string;
-};
+    /* table */
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 8px 30px rgba(2,6,23,0.06);overflow:hidden}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    thead th{background:#f1f5f9;padding:12px 16px;text-align:left;color:#475569;font-weight:600;font-size:13px}
+    tbody td{padding:14px 16px;border-top:1px solid #f1f5f9;vertical-align:middle}
+    .amount{font-weight:700;font-variant-numeric:tabular-nums}
+    .btn-ghost{background:transparent;border:0;color:var(--accent);cursor:pointer;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+    .no-data{text-align:center;padding:34px;color:var(--muted)}
 
-// --- Demo Data (replace with your API later)
-const DEMO_LOANS: Loan[] = [
-  {
-    id: "LN-10027",
-    borrower: "Rahul Sharma",
-    amount: 1250000,
-    apr: 11.75,
-    status: "Approved",
-    updatedAt: "2025-10-14",
-    product: "Home Loan",
-    purpose: "Purchase",
-    termMonths: 240,
-    notes: "Pre-approved subject to property valuation.",
-  },
-  {
-    id: "LN-10028",
-    borrower: "Priya Natarajan",
-    amount: 350000,
-    apr: 16.2,
-    status: "On Hold",
-    updatedAt: "2025-10-15",
-    product: "Personal Loan",
-    purpose: "Medical",
-    termMonths: 48,
-    notes: "Awaiting latest bank statements.",
-  },
-  {
-    id: "LN-10029",
-    borrower: "Ankit Verma",
-    amount: 890000,
-    apr: 13.5,
-    status: "Rejected",
-    updatedAt: "2025-10-09",
-    product: "Auto Loan",
-    purpose: "New Car",
-    termMonths: 60,
-    notes: "Credit score below minimum threshold.",
-  },
-  {
-    id: "LN-10030",
-    borrower: "Sowmya Krishnan",
-    amount: 2100000,
-    apr: 10.9,
-    status: "Approved",
-    updatedAt: "2025-10-18",
-    product: "Home Loan",
-    purpose: "Refinance",
-    termMonths: 180,
-    notes: "Offer valid for 14 days.",
-  },
-  {
-    id: "LN-10031",
-    borrower: "Vikram Singh",
-    amount: 560000,
-    apr: 15.0,
-    status: "On Hold",
-    updatedAt: "2025-10-19",
-    product: "Business Loan",
-    purpose: "Working Capital",
-    termMonths: 36,
-    notes: "KYC re-verification in progress.",
-  },
-];
+    /* badges */
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .badge.approved{background:rgba(16,185,129,0.12);color:var(--success);border:1px solid rgba(16,185,129,0.14)}
+    .badge.rejected{background:rgba(239,68,68,0.08);color:var(--danger);border:1px solid rgba(239,68,68,0.12)}
+    .badge.onhold{background:rgba(245,158,11,0.08);color:var(--warn);border:1px solid rgba(245,158,11,0.12)}
 
-// --- Helpers
-function formatINR(n: number) {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
+    /* drawer */
+    .drawer-backdrop{position:fixed;inset:0;display:none}
+    .drawer-backdrop.show{display:block;backdrop-filter: blur(2px);background: rgba(2,6,23,0.3)}
+    .drawer{position:fixed;right:-520px;top:0;height:100%;width:460px;background:var(--card);box-shadow:-30px 0 70px rgba(2,6,23,0.12);transition:right .28s ease;padding:18px;overflow:auto}
+    .drawer.open{right:0}
+    .drawer header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .meta{color:var(--muted);font-size:13px}
+    .section{margin-top:18px}
+    .info-row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px dashed #eef2f6}
+    .info-row:first-child{border-top:0;padding-top:0}
 
-function StatusBadge({ status }: { status: LoanStatus }) {
-  const styles: Record<LoanStatus, string> = {
-    Approved:
-      "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
-    Rejected:
-      "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200",
-    "On Hold":
-      "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",
-  };
-  return (
-    <Badge className={`rounded-full px-3 py-1 text-xs font-medium ${styles[status]}`}>{status}</Badge>
-  );
-}
-
-function InfoRow({ label, value, icon }: { label: string; value?: string | number; icon?: JSX.Element }) {
-  return (
-    <div className="flex items-center justify-between py-2 text-sm">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        {icon}
-        <span>{label}</span>
+    /* responsive */
+    @media (max-width:880px){
+      .drawer{width:100%;right:-100%}
+      .drawer.open{right:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Loan Pipeline</h1>
+        <p class="sub">Scan loans by milestone — click any row to open details.</p>
       </div>
-      <div className="font-medium text-right">{value ?? "—"}</div>
-    </div>
-  );
-}
+      <div style="text-align:right;color:var(--muted);font-size:13px">Hardcoded demo • No backend</div>
+    </header>
 
-// --- Main Component
-export default function LoanDashboard() {
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | LoanStatus>("All");
-  const [selected, setSelected] = useState<Loan | null>(null);
-
-  const loans = DEMO_LOANS;
-
-  const counts = useMemo(() => {
-    return loans.reduce(
-      (acc, l) => {
-        acc.All += 1;
-        acc[l.status] += 1 as number;
-        return acc;
-      },
-      { All: 0, Approved: 0, Rejected: 0, "On Hold": 0 } as Record<"All" | LoanStatus, number>
-    );
-  }, [loans]);
-
-  const filtered = useMemo(() => {
-    return loans
-      .filter((l) => (statusFilter === "All" ? true : l.status === statusFilter))
-      .filter((l) =>
-        [l.id, l.borrower].some((x) => x.toLowerCase().includes(query.trim().toLowerCase()))
-      )
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  }, [loans, query, statusFilter]);
-
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-slate-50 to-white p-6 md:p-10">
-      <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="mb-6 flex flex-col items-start justify-between gap-4 md:mb-8 md:flex-row md:items-center">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Loan Pipeline</h1>
-            <p className="text-sm text-muted-foreground">Quickly scan loans by milestone and open details in a click.</p>
-          </div>
-          <div className="flex w-full items-center gap-2 md:w-80">
-            <div className="relative w-full">
-              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by borrower or ID…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Status Filters */}
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-          {(["All", "Approved", "Rejected", "On Hold"] as const).map((key) => (
-            <Card
-              key={key}
-              onClick={() => setStatusFilter(key)}
-              className={`cursor-pointer transition hover:shadow-md ${
-                statusFilter === key ? "ring-2 ring-primary" : ""
-              }`}
-            >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium">{key}</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-3xl font-semibold">{counts[key]}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Table */}
-        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <table className="min-w-full table-fixed">
-            <thead className="bg-slate-50 text-left text-sm text-slate-600">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Loan ID</th>
-                <th className="px-5 py-3 font-semibold">Borrower</th>
-                <th className="px-5 py-3 font-semibold w-32">Amount</th>
-                <th className="px-5 py-3 font-semibold w-24">APR</th>
-                <th className="px-5 py-3 font-semibold w-36">Status</th>
-                <th className="px-5 py-3 font-semibold w-40">Updated</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {filtered.map((loan) => (
-                <tr key={loan.id} className="hover:bg-slate-50">
-                  <td className="px-5 py-4 font-medium">{loan.id}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <User2 className="h-4 w-4 text-muted-foreground" />
-                      <span>{loan.borrower}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 font-medium tabular-nums">{formatINR(loan.amount)}</td>
-                  <td className="px-5 py-4 tabular-nums">{loan.apr.toFixed(2)}%</td>
-                  <td className="px-5 py-4"><StatusBadge status={loan.status} /></td>
-                  <td className="px-5 py-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2"><Calendar className="h-4 w-4" />{new Date(loan.updatedAt).toLocaleDateString()}</div>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <Button size="sm" variant="ghost" className="group" onClick={() => setSelected(loan)}>
-                      View <ChevronRight className="ml-1 h-4 w-4 transition group-hover:translate-x-0.5" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-sm text-muted-foreground">
-                    No loans match your filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Detail Drawer */}
-        <Sheet open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-          <SheetContent side="right" className="w-full max-w-xl p-0">
-            {selected && (
-              <div className="h-full overflow-y-auto">
-                <div className="sticky top-0 z-10 border-b bg-white p-5">
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center justify-between">
-                      <span>Loan Details</span>
-                      <StatusBadge status={selected.status} />
-                    </SheetTitle>
-                    <SheetDescription>#{selected.id} · Updated {new Date(selected.updatedAt).toLocaleDateString()}</SheetDescription>
-                  </SheetHeader>
-                </div>
-
-                <div className="grid gap-4 p-5">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <InfoRow label="Borrower" value={selected.borrower} icon={<User2 className="h-4 w-4" />} />
-                      <Separator />
-                      <InfoRow label="Amount" value={formatINR(selected.amount)} icon={<IndianRupee className="h-4 w-4" />} />
-                      <Separator />
-                      <InfoRow label="APR" value={`${selected.apr.toFixed(2)}%`} icon={<Percent className="h-4 w-4" />} />
-                      <Separator />
-                      <InfoRow label="Product" value={selected.product} />
-                      <Separator />
-                      <InfoRow label="Purpose" value={selected.purpose} />
-                      <Separator />
-                      <InfoRow label="Term" value={`${selected.termMonths ?? "—"} months`} />
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Milestones</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ol className="relative ml-3 border-l pl-5">
-                        <li className="mb-6">
-                          <div className="absolute -left-[9px] top-1 h-2.5 w-2.5 rounded-full bg-slate-300" />
-                          <p className="text-sm font-medium">Submitted</p>
-                          <p className="text-xs text-muted-foreground">Application received</p>
-                        </li>
-                        <li className="mb-6">
-                          <div className="absolute -left-[9px] top-1 h-2.5 w-2.5 rounded-full bg-slate-300" />
-                          <p className="text-sm font-medium">Under Review</p>
-                          <p className="text-xs text-muted-foreground">Credit & documents verified</p>
-                        </li>
-                        <li className="mb-2">
-                          <div className={`absolute -left-[9px] top-1 h-2.5 w-2.5 rounded-full ${
-                            selected.status === "Approved"
-                              ? "bg-emerald-500"
-                              : selected.status === "Rejected"
-                              ? "bg-rose-500"
-                              : "bg-amber-500"
-                          }`} />
-                          <p className="text-sm font-medium">{selected.status}</p>
-                          <p className="text-xs text-muted-foreground">Final decision recorded</p>
-                        </li>
-                      </ol>
-                    </CardContent>
-                  </Card>
-
-                  {selected.notes && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Notes</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm leading-relaxed text-slate-700">{selected.notes}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            )}
-          </SheetContent>
-        </Sheet>
+    <div class="controls">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right:8px;flex:0 0 16px;opacity:.6"><path fill="currentColor" d="M21 21l-4.35-4.35"></path><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <input id="searchInput" placeholder="Search by borrower or ID…" />
+      </div>
+      <div class="filters" id="filterGroup" aria-hidden="false">
+        <button class="filter-btn active" data-filter="All">All <span id="countAll" style="margin-left:8px;color:var(--muted);font-weight:600"></span></button>
+        <button class="filter-btn" data-filter="Approved">Approved <span id="countApproved" style="margin-left:8px;color:var(--muted);font-weight:600"></span></button>
+        <button class="filter-btn" data-filter="Rejected">Rejected <span id="countRejected" style="margin-left:8px;color:var(--muted);font-weight:600"></span></button>
+        <button class="filter-btn" data-filter="On Hold">On Hold <span id="countOnHold" style="margin-left:8px;color:var(--muted);font-weight:600"></span></button>
       </div>
     </div>
-  );
-}
+
+    <div class="card" id="tableCard" style="margin-top:8px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Loan ID</th>
+            <th>Borrower</th>
+            <th style="width:120px">Amount</th>
+            <th style="width:100px">APR</th>
+            <th style="width:140px">Status</th>
+            <th style="width:120px">Updated</th>
+            <th style="width:90px"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+      <div id="noData" class="no-data" style="display:none">No loans match your filters.</div>
+    </div>
+  </div>
+
+  <!-- Drawer -->
+  <div id="drawerBackdrop" class="drawer-backdrop" role="dialog" aria-hidden="true"></div>
+  <aside id="drawer" class="drawer" aria-hidden="true" aria-labelledby="drawerTitle">
+    <header>
+      <div>
+        <h2 id="drawerTitle" style="margin:0;font-size:16px">Loan Details</h2>
+        <div id="drawerSubtitle" class="meta">#LN-00000 · Updated —</div>
+      </div>
+      <div><button id="closeDrawer" class="btn-ghost" title="Close">Close ✕</button></div>
+    </header>
+
+    <div id="drawerContent" style="margin-top:14px">
+      <!-- Summary card -->
+      <div class="section">
+        <h3 style="margin:0 0 8px 0">Summary</h3>
+        <div style="background:#fafafa;border-radius:8px;padding:12px">
+          <div class="info-row"><div class="meta">Borrower</div><div id="dBorrower" style="font-weight:700"></div></div>
+          <div class="info-row"><div class="meta">Amount</div><div id="dAmount" style="font-weight:700"></div></div>
+          <div class="info-row"><div class="meta">APR</div><div id="dApr"></div></div>
+          <div class="info-row"><div class="meta">Product</div><div id="dProduct"></div></div>
+          <div class="info-row"><div class="meta">Purpose</div><div id="dPurpose"></div></div>
+          <div class="info-row"><div class="meta">Term</div><div id="dTerm"></div></div>
+        </div>
+      </div>
+
+      <!-- Milestones -->
+      <div class="section">
+        <h3 style="margin:0 0 8px 0">Milestones</h3>
+        <div style="background:#fafafa;border-radius:8px;padding:12px">
+          <div style="margin-bottom:10px;font-weight:700" id="milestoneFinal"></div>
+          <div class="meta">Submitted — Application received</div>
+          <div style="height:12px"></div>
+          <div class="meta">Under Review — Credit & documents verified</div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="section" id="notesSection" style="display:none">
+        <h3 style="margin:0 0 8px 0">Notes</h3>
+        <div style="background:#fafafa;border-radius:8px;padding:12px;color:#0b1220" id="dNotes"></div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    // -----------------------------
+    // Hardcoded demo loans (no backend)
+    // -----------------------------
+    const LOANS = [
+      { id: "LN-10027", borrower: "Rahul Sharma", amount: 1250000, apr: 11.75, status: "Approved", updatedAt: "2025-10-14", product: "Home Loan", purpose: "Purchase", termMonths: 240, notes: "Pre-approved subject to property valuation." },
+      { id: "LN-10028", borrower: "Priya Natarajan", amount: 350000, apr: 16.2, status: "On Hold", updatedAt: "2025-10-15", product: "Personal Loan", purpose: "Medical", termMonths: 48, notes: "Awaiting latest bank statements." },
+      { id: "LN-10029", borrower: "Ankit Verma", amount: 890000, apr: 13.5, status: "Rejected", updatedAt: "2025-10-09", product: "Auto Loan", purpose: "New Car", termMonths: 60, notes: "Credit score below minimum threshold." },
+      { id: "LN-10030", borrower: "Sowmya Krishnan", amount: 2100000, apr: 10.9, status: "Approved", updatedAt: "2025-10-18", product: "Home Loan", purpose: "Refinance", termMonths: 180, notes: "Offer valid for 14 days." },
+      { id: "LN-10031", borrower: "Vikram Singh", amount: 560000, apr: 15.0, status: "On Hold", updatedAt: "2025-10-19", product: "Business Loan", purpose: "Working Capital", termMonths: 36, notes: "KYC re-verification in progress." }
+    ];
+
+    // -----------------------------
+    // Utils
+    // -----------------------------
+    const $ = (s, root=document) => root.querySelector(s);
+    const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
+
+    function formatINR(n) {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+    }
+    function prettyDate(s) {
+      try { return new Date(s).toLocaleDateString(); } catch(e){ return s; }
+    }
+
+    // -----------------------------
+    // Render & interaction
+    // -----------------------------
+    const tableBody = $('#tableBody');
+    const noData = $('#noData');
+    const searchInput = $('#searchInput');
+    const filterGroup = $('#filterGroup');
+    let activeFilter = "All";
+    let query = "";
+
+    function counts(loans) {
+      return loans.reduce((acc, l) => {
+        acc.All++; acc[l.status] = (acc[l.status]||0)+1; return acc;
+      }, { All:0, Approved:0, Rejected:0, "On Hold":0 });
+    }
+
+    function renderCounts() {
+      const c = counts(LOANS);
+      $('#countAll').textContent = c.All;
+      $('#countApproved').textContent = c.Approved;
+      $('#countRejected').textContent = c.Rejected;
+      $('#countOnHold').textContent = c["On Hold"];
+    }
+
+    function renderTable() {
+      const lower = query.trim().toLowerCase();
+      const filtered = LOANS
+        .filter(l => activeFilter === "All" ? true : l.status === activeFilter)
+        .filter(l => {
+          if (!lower) return true;
+          return l.id.toLowerCase().includes(lower) || l.borrower.toLowerCase().includes(lower);
+        })
+        .sort((a,b)=> b.updatedAt.localeCompare(a.updatedAt));
+
+      tableBody.innerHTML = '';
+      if (filtered.length === 0) {
+        noData.style.display = 'block';
+        return;
+      } else {
+        noData.style.display = 'none';
+      }
+
+      for (const loan of filtered) {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${loan.id}</td>
+          <td>${loan.borrower}</td>
+          <td class="amount">${formatINR(loan.amount)}</td>
+          <td>${loan.apr.toFixed(2)}%</td>
+          <td>${statusBadgeHtml(loan.status)}</td>
+          <td>${prettyDate(loan.updatedAt)}</td>
+          <td style="text-align:right"><button class="btn-ghost view-btn" data-id="${loan.id}">View →</button></td>
+        `;
+        tableBody.appendChild(tr);
+      }
+
+      // attach click handlers for view buttons
+      $$('.view-btn').forEach(btn => {
+        btn.addEventListener('click', (ev) => {
+          const id = ev.currentTarget.dataset.id;
+          const loan = LOANS.find(x=>x.id===id);
+          if (loan) openDrawer(loan);
+        });
+      });
+    }
+
+    function statusBadgeHtml(status) {
+      if (status === "Approved") return `<span class="badge approved">${status}</span>`;
+      if (status === "Rejected") return `<span class="badge rejected">${status}</span>`;
+      return `<span class="badge onhold">${status}</span>`;
+    }
+
+    // filters
+    filterGroup.addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      activeFilter = btn.dataset.filter;
+      // UI active
+      $$('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable();
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      query = e.target.value;
+      renderTable();
+    });
+
+    // -----------------------------
+    // Drawer (detail view)
+    // -----------------------------
+    const drawer = $('#drawer');
+    const backdrop = $('#drawerBackdrop');
+    const closeDrawer = $('#closeDrawer');
+
+    function openDrawer(loan) {
+      $('#drawerTitle').textContent = "Loan Details";
+      $('#drawerSubtitle').textContent = `#${loan.id} · Updated ${prettyDate(loan.updatedAt)}`;
+      $('#dBorrower').textContent = loan.borrower;
+      $('#dAmount').textContent = formatINR(loan.amount);
+      $('#dApr').textContent = loan.apr.toFixed(2) + '%';
+      $('#dProduct').textContent = loan.product || '—';
+      $('#dPurpose').textContent = loan.purpose || '—';
+      $('#dTerm').textContent = loan.termMonths ? loan.termMonths + ' months' : '—';
+      $('#milestoneFinal').innerHTML = statusBadgeHtml(loan.status);
+
+      if (loan.notes) {
+        $('#dNotes').textContent = loan.notes;
+        $('#notesSection').style.display = 'block';
+      } else {
+        $('#notesSection').style.display = 'none';
+      }
+
+      drawer.classList.add('open');
+      backdrop.classList.add('show');
+      drawer.setAttribute('aria-hidden','false');
+      backdrop.setAttribute('aria-hidden','false');
+      // trap focus not required for demo but can be added
+    }
+
+    function closeDrawerFn() {
+      drawer.classList.remove('open');
+      backdrop.classList.remove('show');
+      drawer.setAttribute('aria-hidden','true');
+      backdrop.setAttribute('aria-hidden','true');
+    }
+
+    closeDrawer.addEventListener('click', closeDrawerFn);
+    backdrop.addEventListener('click', closeDrawerFn);
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeDrawerFn(); });
+
+    // Init
+    renderCounts();
+    renderTable();
+
+    // For demo: allow clicking a row with Enter key when focused on View button
+    // (already handled by click)
+  </script>
+</body>
+</html>
