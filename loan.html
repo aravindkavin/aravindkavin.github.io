@@ -1,419 +1,142 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Loan Details</title>
-  <style>
-    :root{
-      --page-bg:#f3f6f9; --card:#ffffff; --muted:#64748b; --accent:#1f6feb;
-      --success:#047857; --danger:#b91c1c; --warn:#92400e; --radius:12px;
-      --container:1100px; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--page-bg);color:#0f172a;min-height:100vh;font-size:15px;line-height:1.45}
-    .topbar{background:#0f172a;color:white;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .topbar h1{margin:0;font-size:16px;font-weight:600}
-    .topbar .meta{color:#cbd5e1;font-size:13px}
-    .wrap{max-width:var(--container);margin:26px auto;padding:0 18px}
-
-    .card{background:var(--card);border-radius:12px;box-shadow:0 6px 30px rgba(2,6,23,0.06);overflow:hidden}
-    .page{display:flex;gap:20px}
-    .main{flex:1;padding:22px}
-    .sidebar{width:320px;padding:22px;border-left:1px solid #f1f5f9;background:linear-gradient(0deg,#ffffff, #fcfdff)}
-    .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-    .loan-title{font-size:18px;font-weight:700;display:flex;gap:12px;align-items:center}
-    .loan-meta{color:var(--muted);font-size:13px}
-
-    /* tabs */
-    .tabs{display:flex;gap:8px;border-bottom:1px solid #eef2f6;margin-top:12px;padding-bottom:10px;flex-wrap:wrap}
-    .tab-btn{background:transparent;border:0;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600;color:#334155}
-    .tab-btn.active{background:linear-gradient(90deg,#f8fafc,#ffffff);box-shadow:inset 0 -3px 0 rgba(31,111,235,0.08);color:var(--accent)}
-    .tab-content{padding:18px 0}
-
-    /* form look */
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-    label{display:block;font-weight:600;margin-bottom:6px;color:#0f172a;font-size:13px}
-    .input-like{background:#fbfdff;border:1px solid #eef2f6;padding:11px 12px;border-radius:10px;color:#0b1220}
-    .input-like[readonly]{opacity:1}
-    .small{font-size:13px;color:var(--muted)}
-
-    /* large section */
-    .section{margin-top:18px}
-    .section h3{margin:0 0 10px 0;font-size:16px;color:#0f172a}
-    .field{margin-bottom:10px}
-
-    /* bank statements list */
-    .file-list{list-style:none;padding:0;margin:0}
-    .file-list li{display:flex;justify-content:space-between;padding:10px 12px;border:1px solid #f1f5f9;border-radius:8px;margin-bottom:8px;background:#fff}
-
-    /* credit report and 1003 layout */
-    .two-cols {display:grid;grid-template-columns:1fr 320px;gap:20px}
-    .box {background:#fff;border-radius:10px;padding:14px;border:1px solid #eef2f6}
-
-    /* footer / actions */
-    .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-    .btn{background:var(--accent);color:white;border:0;padding:9px 14px;border-radius:8px;cursor:pointer;font-weight:700}
-    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(31,111,235,0.12)}
-    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700}
-    .badge.approved{background:#ecfdf5;color:var(--success);border:1px solid rgba(16,185,129,0.12)}
-    .badge.rejected{background:#fff1f2;color:var(--danger);border:1px solid rgba(239,68,68,0.12)}
-    .badge.onhold{background:#fff8ed;color:var(--warn);border:1px solid rgba(245,158,11,0.12)}
-
-    /* responsive */
-    @media (max-width:980px){
-      .page{flex-direction:column}
-      .sidebar{width:100%;border-left:0;border-top:1px solid #f1f5f9}
-      .two-cols{grid-template-columns:1fr}
-      .two-col{grid-template-columns:1fr}
-      .two-cols .box{margin-bottom:12px}
-      .topbar{flex-direction:column;align-items:flex-start;gap:8px}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Loan Details</title>
+<style>
+:root{
+  --bg:#f3f6f9;--card:#fff;--accent:#1f6feb;--muted:#64748b;
+  --success:#047857;--danger:#b91c1c;--warn:#92400e;font-family:Inter,system-ui,sans-serif;
+}
+body{margin:0;background:var(--bg);color:#0f172a}
+.topbar{background:#0f172a;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+.topbar h1{margin:0;font-size:16px}
+.container{max-width:1100px;margin:24px auto;background:var(--card);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);padding:24px}
+.tabs{display:flex;gap:10px;border-bottom:1px solid #e5e7eb;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:none;border:0;padding:10px 12px;font-weight:600;cursor:pointer}
+.tab.active{color:var(--accent);border-bottom:3px solid var(--accent)}
+.panel{display:none}
+.panel.active{display:block}
+label{font-weight:600;font-size:14px;display:block;margin-bottom:4px}
+.input-like{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.badge{border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;display:inline-block}
+.badge.approved{background:#ecfdf5;color:var(--success)}
+.badge.rejected{background:#fef2f2;color:var(--danger)}
+.badge.onhold{background:#fefce8;color:var(--warn)}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 14px;border-radius:6px;cursor:pointer}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div class="topbar">
-    <div style="display:flex;gap:14px;align-items:center">
-      <button id="backBtn" style="background:transparent;border:0;color:#cbd5e1;cursor:pointer;font-weight:700">← Back</button>
-      <h1>Loan Portal</h1>
-    </div>
-    <div class="meta">QuickQual ID <strong id="quickQual">QQ#200312292336</strong></div>
+<div class="topbar">
+  <div>
+    <button onclick="location.href='index.html'" style="background:none;border:0;color:#cbd5e1;font-weight:700;cursor:pointer">← Back</button>
+    <h1 style="display:inline;margin-left:8px">Loan Details</h1>
+  </div>
+  <div id="statusBadge"></div>
+</div>
+
+<div class="container">
+  <h2 id="loanId" style="margin-top:0"></h2>
+  <div style="color:var(--muted);font-size:14px;margin-bottom:20px" id="borrowerLine"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="analysis">Analysis Summary</button>
+    <button class="tab" data-tab="bank">Bank Statements</button>
+    <button class="tab" data-tab="business">Business Narrative</button>
+    <button class="tab" data-tab="f1003">1003</button>
+    <button class="tab" data-tab="credit">Credit Report</button>
+    <button class="tab" data-tab="broker">Broker Form</button>
   </div>
 
-  <div class="wrap">
-    <div class="card page">
-      <!-- MAIN -->
-      <main class="main">
-        <div class="header-row">
-          <div>
-            <div class="loan-title">
-              <span id="loanId">#LN-00000</span>
-              <span id="borrowerName" style="font-size:15px;color:#0f172a;font-weight:600">Borrower Name</span>
-              <span id="statusBadge" style="margin-left:8px"></span>
-            </div>
-            <div class="loan-meta" id="incomePeriod">Income Period: 24 Months</div>
-          </div>
-          <div class="actions" style="align-items:center">
-            <button class="btn ghost" id="viewAll">View All (17)</button>
-            <button class="btn" id="saveBtn">Save</button>
-          </div>
-        </div>
+  <!-- Panels -->
+  <div class="panel active" id="analysis">
+    <h3>Analysis Summary</h3>
+    <p>Loan approved based on hard-coded mock analysis.</p>
+  </div>
 
-        <!-- Tabs -->
-        <nav class="tabs" role="tablist" aria-label="Loan detail tabs">
-          <button class="tab-btn active" data-tab="analysis">Analysis Summary</button>
-          <button class="tab-btn" data-tab="bank">Bank Statements</button>
-          <button class="tab-btn" data-tab="business">Business Narrative</button>
-          <button class="tab-btn" data-tab="1003">1003</button>
-          <button class="tab-btn" data-tab="credit">Credit Report</button>
-          <button class="tab-btn" data-tab="broker">Broker Form</button>
-        </nav>
+  <div class="panel" id="bank">
+    <h3>Bank Statements</h3>
+    <ul id="bankList"></ul>
+  </div>
 
-        <div class="tab-content">
-          <!-- Analysis Summary -->
-          <section id="tab-analysis" class="tab-panel" style="display:block">
-            <div class="section">
-              <h3>Analysis Summary</h3>
-              <div class="two-cols">
-                <div class="box">
-                  <h4 style="margin:0 0 8px 0">Income Analysis</h4>
-                  <p class="small">Detected income streams and monthly average.</p>
-                  <div style="margin-top:12px;font-weight:700">Calculated Monthly Income: <span id="calcIncome">—</span></div>
-                </div>
-                <aside class="box">
-                  <h4 style="margin:0 0 8px 0">Key Flags</h4>
-                  <ul style="margin:0;padding-left:18px">
-                    <li id="flag1">No major flags</li>
-                    <li id="flag2" class="small" style="color:var(--muted)">KYC pending</li>
-                  </ul>
-                </aside>
-              </div>
-            </div>
-          </section>
+  <div class="panel" id="business">
+    <h3>Business Narrative Form</h3>
+    <div class="grid2">
+      <div>
+        <label>Borrower Name</label><div class="input-like" id="bBorrower"></div>
+        <label>Entity Name</label><div class="input-like" id="bEntity"></div>
+        <label>Company Start Date</label><div class="input-like" id="bStart"></div>
+      </div>
+      <div>
+        <label>% Ownership</label><div class="input-like" id="bOwner"></div>
+        <label>Loan Number</label><div class="input-like" id="bLoan"></div>
+        <label>Status</label><div class="input-like" id="bStatus"></div>
+      </div>
+    </div>
+    <label style="margin-top:14px;display:block">Describe how your business generates revenue</label>
+    <div class="input-like" id="bRevenue" style="min-height:70px;white-space:pre-wrap"></div>
+  </div>
 
-          <!-- Bank Statements -->
-          <section id="tab-bank" class="tab-panel" style="display:none">
-            <div class="section">
-              <h3>Bank Statements</h3>
-              <p class="small">Uploaded statements (hardcoded demo). Click to view (opens file in new tab in real deployments).</p>
-              <ul class="file-list" id="bankFileList">
-                <!-- list filled by JS -->
-              </ul>
-            </div>
-          </section>
-
-          <!-- Business Narrative -->
-          <section id="tab-business" class="tab-panel" style="display:none">
-            <div class="section">
-              <h3>Business Narrative Form</h3>
-              <div class="two-col" style="margin-top:12px">
-                <div>
-                  <div class="field">
-                    <label>Borrower Name*</label>
-                    <div class="input-like" id="bnBorrower">—</div>
-                  </div>
-                  <div class="field">
-                    <label>Entity/Business Name*</label>
-                    <div class="input-like" id="bnBusiness">—</div>
-                  </div>
-                  <div class="field">
-                    <label>Company Start Date*</label>
-                    <div class="input-like" id="bnStart">—</div>
-                  </div>
-                </div>
-                <div>
-                  <div class="field">
-                    <label>Loan Number</label>
-                    <div class="input-like" id="bnLoanNum">—</div>
-                  </div>
-                  <div class="field">
-                    <label>% Ownership in the Business*</label>
-                    <div class="input-like" id="bnOwnership">—</div>
-                  </div>
-                  <div class="field">
-                    <label>Status</label>
-                    <div class="input-like" id="bnStatus">—</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="section" style="margin-top:18px">
-                <label>1. Describe how your business generates revenue.*</label>
-                <div class="input-like" id="bnRevenueDesc" style="min-height:72px;white-space:pre-wrap">—</div>
-              </div>
-            </div>
-          </section>
-
-          <!-- 1003 -->
-          <section id="tab-1003" class="tab-panel" style="display:none">
-            <div class="section">
-              <h3>Form 1003 (Uniform Residential Loan Application) — Summary</h3>
-              <div style="margin-top:12px" class="two-col">
-                <div>
-                  <div class="field"><label>Property Address</label><div class="input-like" id="f1003_prop">—</div></div>
-                  <div class="field"><label>Loan Amount</label><div class="input-like" id="f1003_amount">—</div></div>
-                  <div class="field"><label>Loan Purpose</label><div class="input-like" id="f1003_purpose">—</div></div>
-                </div>
-                <div>
-                  <div class="field"><label>Borrower Employment</label><div class="input-like" id="f1003_emp">—</div></div>
-                  <div class="field"><label>Monthly Income</label><div class="input-like" id="f1003_income">—</div></div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Credit Report -->
-          <section id="tab-credit" class="tab-panel" style="display:none">
-            <div class="section">
-              <h3>Credit Report</h3>
-              <div class="box" style="margin-top:12px">
-                <div><strong>Score:</strong> <span id="creditScore">—</span></div>
-                <div style="margin-top:8px" class="small" id="creditSummary">—</div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Broker Form -->
-          <section id="tab-broker" class="tab-panel" style="display:none">
-            <div class="section">
-              <h3>Broker Form</h3>
-              <div class="box" style="margin-top:12px">
-                <div class="field"><label>Broker Name</label><div class="input-like" id="brokerName">—</div></div>
-                <div class="field"><label>Broker Notes</label><div class="input-like" id="brokerNotes" style="min-height:80px;white-space:pre-wrap">—</div></div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
-
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <div>
-          <h4 style="margin:0 0 6px 0">Snapshot</h4>
-          <div class="small" style="margin-bottom:10px">Quick loan snapshot & actions</div>
-
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-            <div style="flex:1">
-              <div style="font-weight:700" id="sbAmount">—</div>
-              <div class="small">Requested Amount</div>
-            </div>
-            <div style="text-align:right">
-              <div id="sbApr" style="font-weight:700">—</div>
-              <div class="small">APR</div>
-            </div>
-          </div>
-
-          <div style="margin-bottom:14px">
-            <div class="small">Last updated</div>
-            <div style="font-weight:700" id="sbUpdated">—</div>
-          </div>
-
-          <div style="margin-top:8px">
-            <button class="btn" id="approveBtn" style="width:100%;margin-bottom:8px">Approve</button>
-            <button class="btn ghost" id="holdBtn" style="width:100%;margin-bottom:8px">Put On Hold</button>
-            <button class="btn ghost" id="rejectBtn" style="width:100%;">Reject</button>
-          </div>
-        </div>
-
-        <div style="margin-top:18px">
-          <h4 style="margin:0 0 6px 0">Quick Links</h4>
-          <div class="small" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-            <a href="#" id="downloadPDF">Download PDF</a>
-            <a href="#" id="viewRaw">View Raw Data</a>
-          </div>
-        </div>
-      </aside>
+  <div class="panel" id="f1003">
+    <h3>Form 1003 Summary</h3>
+    <div class="grid2">
+      <div><label>Loan Purpose</label><div class="input-like" id="fPurpose"></div></div>
+      <div><label>Monthly Income</label><div class="input-like" id="fIncome"></div></div>
     </div>
   </div>
 
-  <script>
-    /* -------------------------
-       Hardcoded demo / fallback data
-       ------------------------- */
-    const DEMO_LOAN = {
-      id: "LN-10027",
-      borrower: "Rahul Sharma",
-      amount: 1250000,
-      apr: 11.75,
-      status: "Approved",
-      updatedAt: "2025-10-14",
-      business: "Sharma Textiles",
-      ownership: "80%",
-      startDate: "2015-04-12",
-      revenueDesc: "Retail textile sales across Chennai retail network and B2B supply for small boutiques.",
-      loanNumber: "172362",
-      propertyAddress: "12, MG Road, Chennai",
-      loanPurpose: "Purchase",
-      employment: "Sole Proprietor - Sharma Textiles",
-      monthlyIncome: 45000,
-      creditScore: 710,
-      creditSummary: "Stable credit profile; one 30-day late in 2023; otherwise healthy.",
-      bankStatements: [
-        {name:"StateBank_2024-01.pdf", uploaded:"2025-10-10"},
-        {name:"StateBank_2024-02.pdf", uploaded:"2025-10-11"},
-        {name:"HDFC_2024-Q1.pdf", uploaded:"2025-10-13"}
-      ],
-      brokerName: "ABC Brokers",
-      brokerNotes: "Client requests expedited processing. Provide valuation within 7 days.",
-      notes: "Pre-approved subject to property valuation."
-    };
+  <div class="panel" id="credit">
+    <h3>Credit Report</h3>
+    <p id="creditInfo"></p>
+  </div>
 
-    // read loan from localStorage (set by index.html). fallback to demo
-    let selectedLoan;
-    try {
-      const s = localStorage.getItem('selectedLoan');
-      selectedLoan = s ? JSON.parse(s) : DEMO_LOAN;
-    } catch (e) {
-      selectedLoan = DEMO_LOAN;
-    }
+  <div class="panel" id="broker">
+    <h3>Broker Form</h3>
+    <label>Broker Notes</label><div class="input-like" id="brokerNotes" style="min-height:70px;white-space:pre-wrap"></div>
+  </div>
+</div>
 
-    // helper formatters
-    function formatINR(n){ return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n); }
-    function prettyDate(d){ try { return new Date(d).toLocaleDateString(); } catch(e){ return d; } }
+<script>
+/* Load from localStorage */
+let loan;
+try{loan=JSON.parse(localStorage.getItem("selectedLoan"))||{};}catch{loan={};}
+if(!loan.id){loan={id:"LN-10027",borrower:"Rahul Sharma",amount:1250000,apr:11.75,status:"Approved",
+  business:"Sharma Textiles",ownership:"80%",startDate:"2015-04-12",
+  revenueDesc:"Retail textile sales in Chennai.",notes:"Demo loan"};}
 
-    /* -------------------------
-       Populate sidebar & header
-       ------------------------- */
-    document.getElementById('loanId').textContent = '#' + selectedLoan.id;
-    document.getElementById('borrowerName').textContent = selectedLoan.borrower;
-    document.getElementById('incomePeriod').textContent = 'Income Period: 24 Months';
-    const statusBadge = document.getElementById('statusBadge');
-    const s = selectedLoan.status || 'On Hold';
-    let sbHtml = '';
-    if(s === 'Approved') sbHtml = '<span class="badge approved">Approved</span>';
-    else if(s === 'Rejected') sbHtml = '<span class="badge rejected">Rejected</span>';
-    else sbHtml = '<span class="badge onhold">On Hold</span>';
-    statusBadge.innerHTML = sbHtml;
+function formatINR(n){return new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n);}
+document.getElementById("loanId").textContent=`#${loan.id} – ${formatINR(loan.amount)} @ ${loan.apr}%`;
+document.getElementById("borrowerLine").textContent=loan.borrower+" · "+(loan.business||"—");
+document.getElementById("statusBadge").innerHTML=`<span class="badge ${loan.status?.toLowerCase().replace(' ','')||'onhold'}">${loan.status||'On Hold'}</span>`;
 
-    // sidebar snapshot
-    document.getElementById('sbAmount').textContent = formatINR(selectedLoan.amount || 0);
-    document.getElementById('sbApr').textContent = (selectedLoan.apr?.toFixed?.(2) ?? '—') + '%';
-    document.getElementById('sbUpdated').textContent = prettyDate(selectedLoan.updatedAt);
+/* fill fields */
+bBorrower.textContent=loan.borrower||"—";
+bEntity.textContent=loan.business||"—";
+bStart.textContent=loan.startDate||"—";
+bOwner.textContent=loan.ownership||"—";
+bLoan.textContent=loan.id||"—";
+bStatus.textContent=loan.status||"—";
+bRevenue.textContent=loan.revenueDesc||loan.notes||"—";
+fPurpose.textContent="Purchase";
+fIncome.textContent=formatINR(45000);
+creditInfo.textContent="Credit Score 710 – Stable profile.";
+brokerNotes.textContent="Client requested expedited processing.";
 
-    // quickqual id
-    document.getElementById('quickQual').textContent = selectedLoan.quickQual || 'QQ#200312292336';
+/* simple tab logic */
+const tabs=document.querySelectorAll(".tab"),panels=document.querySelectorAll(".panel");
+tabs.forEach(t=>t.addEventListener("click",()=>{
+  tabs.forEach(b=>b.classList.remove("active"));
+  t.classList.add("active");
+  panels.forEach(p=>p.classList.remove("active"));
+  document.getElementById(t.dataset.tab).classList.add("active");
+}));
 
-    /* -------------------------
-       Populate tabs content
-       ------------------------- */
-    // Analysis
-    const calcMonthly = Math.round((selectedLoan.monthlyIncome || (selectedLoan.amount/24)) || 0);
-    document.getElementById('calcIncome').textContent = formatINR(calcMonthly);
-
-    // flags
-    document.getElementById('flag1').textContent = (selectedLoan.notes ? selectedLoan.notes : 'No major flags');
-    document.getElementById('flag2').textContent = 'KYC pending'; // demo static
-
-    // Bank statements listing
-    const bankList = document.getElementById('bankFileList');
-    (selectedLoan.bankStatements || []).forEach(f => {
-      const li = document.createElement('li');
-      li.innerHTML = `<div style="font-weight:700">${f.name}</div><div style="text-align:right"><div class="small">Uploaded ${prettyDate(f.uploaded)}</div><div style="margin-top:6px"><a href="#" onclick="alert('Open: ${f.name} (demo)')" style="color:var(--accent);font-weight:700">Open</a></div></div>`;
-      bankList.appendChild(li);
-    });
-    if(! (selectedLoan.bankStatements || []).length){
-      bankList.innerHTML = '<li class="small">No statements uploaded</li>';
-    }
-
-    // Business narrative
-    document.getElementById('bnBorrower').textContent = selectedLoan.borrower || '—';
-    document.getElementById('bnBusiness').textContent = selectedLoan.business || '—';
-    document.getElementById('bnStart').textContent = prettyDate(selectedLoan.startDate || '—');
-    document.getElementById('bnLoanNum').textContent = selectedLoan.loanNumber || '—';
-    document.getElementById('bnOwnership').textContent = selectedLoan.ownership || '—';
-    document.getElementById('bnStatus').textContent = selectedLoan.status || '—';
-    document.getElementById('bnRevenueDesc').textContent = selectedLoan.revenueDesc || '—';
-
-    // 1003
-    document.getElementById('f1003_prop').textContent = selectedLoan.propertyAddress || '—';
-    document.getElementById('f1003_amount').textContent = formatINR(selectedLoan.amount || 0);
-    document.getElementById('f1003_purpose').textContent = selectedLoan.loanPurpose || '—';
-    document.getElementById('f1003_emp').textContent = selectedLoan.employment || '—';
-    document.getElementById('f1003_income').textContent = formatINR(selectedLoan.monthlyIncome || 0);
-
-    // credit
-    document.getElementById('creditScore').textContent = selectedLoan.creditScore || '—';
-    document.getElementById('creditSummary').textContent = selectedLoan.creditSummary || '—';
-
-    // broker
-    document.getElementById('brokerName').textContent = selectedLoan.brokerName || '—';
-    document.getElementById('brokerNotes').textContent = selectedLoan.brokerNotes || '—';
-
-    // actions
-    document.getElementById('approveBtn').addEventListener('click', () => { alert('Marked as Approved (demo)'); });
-    document.getElementById('holdBtn').addEventListener('click', () => { alert('Marked as On Hold (demo)'); });
-    document.getElementById('rejectBtn').addEventListener('click', () => { alert('Marked as Rejected (demo)'); });
-    document.getElementById('saveBtn').addEventListener('click', () => { alert('Saved (demo)'); });
-
-    document.getElementById('downloadPDF').addEventListener('click', (e)=>{ e.preventDefault(); alert('Download PDF (demo)'); });
-    document.getElementById('viewRaw').addEventListener('click', (e)=>{ e.preventDefault(); alert(JSON.stringify(selectedLoan, null, 2)); });
-
-    // back button
-    document.getElementById('backBtn').addEventListener('click', ()=> { window.location.href = 'index.html'; });
-
-    /* -------------------------
-       Tabs logic (simple)
-       ------------------------- */
-    const tabBtns = Array.from(document.querySelectorAll('.tab-btn'));
-    const panels = Array.from(document.querySelectorAll('.tab-panel'));
-    function showTab(tabName){
-      tabBtns.forEach(b=> b.classList.toggle('active', b.dataset.tab === tabName));
-      panels.forEach(p => p.style.display = (p.id === 'tab-' + tabName) ? 'block' : 'none');
-      // set URL hash for direct linking
-      history.replaceState(null, '', '#' + tabName);
-    }
-    tabBtns.forEach(b => b.addEventListener('click', ()=> showTab(b.dataset.tab)));
-
-    // check hash on load
-    const hash = location.hash.replace('#','');
-    if(hash && tabBtns.some(b=>b.dataset.tab === hash)) showTab(hash);
-    else showTab('analysis');
-
-    // optionally show alert if validation gaps exist (demo rule)
-    if(!selectedLoan.bankStatements || selectedLoan.bankStatements.length < 2){
-      document.getElementById('alert').style.display = 'block';
-      document.getElementById('alert').textContent = 'Data and Validation Gaps Identified — Click "Bank Statements" to review missing docs.';
-    }
-  </script>
+/* bank list demo */
+document.getElementById("bankList").innerHTML="<li>StateBank_2024-01.pdf</li><li>HDFC_Q1.pdf</li>";
+</script>
 </body>
 </html>
